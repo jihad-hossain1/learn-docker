@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  nextjs:
+    build:
+      context: ./nextjs-project
+      dockerfile: Dockerfile
+    container_name: nextjs-app
+    environment:
+      - NODE_ENV=development  # Use development mode for hot reloading
+    ports:
+      - "3000:3000"  # Expose port 3000 to the host
+    volumes:
+      - ./nextjs-project # Bind mount your project directory
+      - /nextjs-project/node_modules      # Prevent overwriting node_modules
+    networks:
+      - app-network
+    depends_on:
+      - mysql  # If you have a MySQL database as part of your app
+    command: yarn dev  # Use development command for hot reloading
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: my_nextjs_db
+    ports:
+      - "3306:3306"  # Expose MySQL port to the host
+    networks:
+      - app-network
+    volumes:
+      - mysql-data:/var/lib/mysql  # Persistent data for MySQL
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
